@@ -1,8 +1,6 @@
 // =====================================================================
 //  Lab 1 - Introduction to SIMD programming
-//  Exercise 2: Vector inner product using SIMD  --  SKELETON
-//
-//  Fill in the parts marked  TODO  in the order of the questions.
+//  Exercise 2: Vector inner product using SIMD  --  SOLUTION
 //
 //  Compiler Explorer (https://godbolt.org): x86-64 gcc, with the options
 //    -O3 -fno-tree-vectorize -std=c++11 -mavx2
@@ -34,8 +32,11 @@ double now()
 // ---------------------------------------------------------------------
 __attribute__((noinline, noipa)) float dot_scalar(const float *x, const float *y, int N)
 {
-  // TODO
-  return 0.0f;
+  float sum = 0.0f;
+  for (int i = 0; i < N; i++) {
+    sum = sum + x[i] * y[i];
+  }
+  return sum;
 }
 
 // ---------------------------------------------------------------------
@@ -49,8 +50,35 @@ __attribute__((noinline, noipa)) float dot_scalar(const float *x, const float *y
 // ---------------------------------------------------------------------
 __attribute__((noinline, noipa)) float dot_simd(const float *x, const float *y, int N)
 {
-  // TODO
-  return 0.0f;
+  int N8 = (N / 8) * 8; // largest multiple of 8 that is <= N
+
+  // Initialize vsum to zero: we only have loadu/storeu/add/sub/mul/div,
+  // so we prepare 8 zeros in memory and load them into a vector.
+  float zeros[8] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+  __m256 vsum = _mm256_loadu_ps(zeros);
+
+  // Vectorized part: vsum = vsum + vx * vy, i.e. the scalar line
+  // sum = sum + x[i] * y[i] applied to 8 elements at a time.
+  for (int i = 0; i < N8; i += 8) {
+    __m256 vx = _mm256_loadu_ps(&x[i]); // vx = x[i], x[i+1], ..., x[i+7]
+    __m256 vy = _mm256_loadu_ps(&y[i]); // vy = y[i], y[i+1], ..., y[i+7]
+    vsum = _mm256_add_ps(vsum, _mm256_mul_ps(vx, vy));
+  }
+
+  // Store the 8 partial sums in memory, then add them with a scalar loop.
+  float partial[8];
+  _mm256_storeu_ps(partial, vsum);
+  float sum = 0.0f;
+  for (int k = 0; k < 8; k++) {
+    sum = sum + partial[k];
+  }
+
+  // Scalar remainder: elements N8, N8 + 1, ..., N - 1
+  for (int i = N8; i < N; i++) {
+    sum = sum + x[i] * y[i];
+  }
+
+  return sum;
 }
 
 // ---------------------------------------------------------------------
@@ -78,19 +106,26 @@ void check(float ref, float val, const char *name)
 void benchmark(int N, int REPS)
 {
   // Allocating arrays x and y of size N, initializing x[i] = i, y[i] = 1.
-  float *x = NULL; // TODO: allocate N floats
-  float *y = NULL; // TODO: allocate N floats
-  // TODO: initialize x[i] = i and y[i] = 1
+  float *x = (float *) malloc(N * sizeof(float));
+  float *y = (float *) malloc(N * sizeof(float));
+  for (int i = 0; i < N; i++) {
+    x[i] = (float) i;
+    y[i] = 1.0f;
+  }
 
   double t0, t_scalar, t_simd;
   float r_scalar = 0.0f, r_simd = 0.0f;
 
   t0 = now();
-  // TODO: call dot_scalar REPS times, storing its result in r_scalar
+  for (int r = 0; r < REPS; r++) {
+    r_scalar = dot_scalar(x, y, N);
+  }
   t_scalar = now() - t0;
 
   t0 = now();
-  // TODO: call dot_simd REPS times, storing its result in r_simd
+  for (int r = 0; r < REPS; r++) {
+    r_simd = dot_simd(x, y, N);
+  }
   t_simd = now() - t0;
 
   printf("N = %d, %d executions\n", N, REPS);
@@ -98,7 +133,8 @@ void benchmark(int N, int REPS)
   printf("  simd   : %.6f s  (result %f, speedup x%.2f)\n", t_simd, r_simd, t_scalar / t_simd);
 
   // Deallocating arrays.
-  // TODO
+  free(x);
+  free(y);
 }
 
 int main()
@@ -111,25 +147,28 @@ int main()
   //  With this initialization, the inner product is 0 + 1 + ... + (N-1)
   //  = N * (N - 1) / 2, which is easy to verify.
   // -------------------------------------------------------------------
-  float *x = NULL; // TODO: allocate N floats
-  float *y = NULL; // TODO: allocate N floats
-  // TODO: initialize x[i] = i and y[i] = 1
+  float *x = (float *) malloc(N * sizeof(float));
+  float *y = (float *) malloc(N * sizeof(float));
+  for (int i = 0; i < N; i++) {
+    x[i] = (float) i;
+    y[i] = 1.0f;
+  }
 
   // -------------------------------------------------------------------
   //  Question (b): scalar inner product.
   // -------------------------------------------------------------------
-  float r_scalar = 0.0f; // TODO: call dot_scalar
+  float r_scalar = dot_scalar(x, y, N);
   printf("[scalar] result = %f (expected %f)\n", r_scalar, (float) N * (N - 1) / 2);
 
   // -------------------------------------------------------------------
   //  Question (c): vectorized inner product + comparison with the scalar
   //  version, for N (multiple of 8) and for M (not a multiple of 8).
   // -------------------------------------------------------------------
-  float r_simd = 0.0f; // TODO: call dot_simd
+  float r_simd = dot_simd(x, y, N);
   check(r_scalar, r_simd, "simd");
 
   const int M = 1019; // 1019 = 127 * 8 + 3  ->  3 remaining elements
-  // TODO: compare dot_scalar and dot_simd on the first M elements using check
+  check(dot_scalar(x, y, M), dot_simd(x, y, M), "simd, N = 1019");
 
   // -------------------------------------------------------------------
   //  Question (d): timing of both versions over REPS executions, for
@@ -146,7 +185,8 @@ int main()
   // -------------------------------------------------------------------
   //  Deallocating arrays.
   // -------------------------------------------------------------------
-  // TODO
+  free(x);
+  free(y);
 
   return 0;
 }
