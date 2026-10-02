@@ -52,7 +52,8 @@ M1DIPAQALGOPAR LABX SURNAME(s) Name(s)
   in the skeleton (e.g. `copy.cpp`, `dot.cpp` for lab 1), directly attached to the
   e-mail: no zip archive, no folder.
 - Answers to the questions of the assignment (timings, speedups, explanations) go as
-  comments at the end of the corresponding source file.
+  comments at the top of the corresponding source file, in the block provided
+  for this purpose in the skeleton.
 - **One** of the four lab assignments will be selected at random and graded, giving up
   to **1/20** points. Submit all of them: you do not know which one will be graded.
 - If you do not follow the e-mail subject format in at least one of your submissions,

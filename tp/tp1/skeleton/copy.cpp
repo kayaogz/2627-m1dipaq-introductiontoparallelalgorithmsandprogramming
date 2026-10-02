@@ -6,7 +6,15 @@
 //
 //  Compiler Explorer (https://godbolt.org): x86-64 gcc, with the options
 //    -O3 -fno-tree-vectorize -std=c++11 -mavx2
-//  and "Execute the code" ticked in the compiler's Options menu.
+//  and "Execute the code" ticked in the "Output..." menu of the compiler pane.
+// =====================================================================
+
+// =====================================================================
+//  ANSWERS to the questions of the assignment (write them here, as
+//  comments; this is the only file you submit for this exercise).
+//
+//  (e) Timings and speedups for N = 1024 and N = 2^20:
+//
 // =====================================================================
 
 #include <cstdio>      // printf

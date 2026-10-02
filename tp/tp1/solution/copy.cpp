@@ -4,7 +4,7 @@
 //
 //  Compiler Explorer (https://godbolt.org): x86-64 gcc, with the options
 //    -O3 -fno-tree-vectorize -std=c++11 -mavx2
-//  and "Execute the code" ticked in the compiler's Options menu.
+//  and "Execute the code" ticked in the "Output..." menu of the compiler pane.
 // =====================================================================
 
 #include <cstdio>      // printf
