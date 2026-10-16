@@ -29,6 +29,9 @@ Claude outputs/
 # mini-exams are never given to students, in any form
 exam/
 
+# course notes ignore for now as not finalized
+course/notes
+
 # maintainer notes and tooling
 CLAUDE.md
 REVIEW*.md
