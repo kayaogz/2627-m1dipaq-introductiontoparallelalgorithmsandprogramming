@@ -1,0 +1,35 @@
+# Only what students receive is versioned: the PDFs (slides, TD and TP sheets,
+# lecture notes), the skeleton and solution code, the example programs of the
+# lectures and README.md. Everything else stays out of git.
+
+# LaTeX sources and style files are private
+*.tex
+*.sty
+*.tikz
+
+# build artefacts
+*.aux
+*.log
+*.nav
+*.snm
+*.toc
+*.out
+*.synctex*
+*.fls
+*.fdb_latexmk
+build/
+
+# figures, legacy material, previews, tooling
+figures/
+old/
+.preview/
+Claude outputs/
+.DS_Store
+
+# mini-exams are never given to students, in any form
+exam/
+
+# maintainer notes and tooling
+CLAUDE.md
+REVIEW*.md
+.claude/
