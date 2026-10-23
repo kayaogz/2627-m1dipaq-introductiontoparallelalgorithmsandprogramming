@@ -141,8 +141,8 @@ int main(int argc, char **argv)
   //   - a process with rank >= half sends its m elements to process
   //     rank - half; its work is done, it leaves the loop;
   //   - a process with rank < half receives the m elements of process
-  //     rank + half into a[m..2m) (the array "a + m"), merges the two
-  //     sorted halves of a[0..2m) with merge, and now holds 2m elements.
+  //     rank + half right after its own, in a[m..2m), merges the two
+  //     sorted halves of a[0..2m), and now holds 2m elements.
   //  half takes the values size/2, size/4, ..., 1 (m starts at n and
   //  doubles at every step); at the end, process 0 holds the sorted
   //  array in a[0..N).
